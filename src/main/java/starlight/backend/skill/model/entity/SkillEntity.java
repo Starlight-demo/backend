@@ -1,10 +1,7 @@
 package starlight.backend.skill.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
+import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.validation.annotation.Validated;
 import starlight.backend.proof.model.entity.ProofEntity;
@@ -21,6 +18,7 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 @NoArgsConstructor
 @Entity
 @Validated
+@Table(name = "skill")
 public class SkillEntity {
     @Id
     @GeneratedValue(strategy = IDENTITY)
