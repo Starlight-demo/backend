@@ -1,8 +1,8 @@
 version: '3.1'
 services:
   backend:
-    container_name: "Starlight_Prod"
-    image: starlight_prod:latest
+    container_name: "Backend"
+    image: sekret3d/starlight_backend:dev
     volumes:
       - backend:/data/backend
     ports:
@@ -15,6 +15,21 @@ services:
       - .env
     depends_on:
       - postgres
+
+    restart: unless-stopped
+
+  frontend:
+    container_name: "Frontend"
+    image: sekret3d/starlight_frontend:main
+    volumes:
+      - frontend:/data/frontend
+    ports:
+      - '3000:3000'
+    networks:
+      - postgres
+    depends_on:
+      - postgres
+      - backend
 
     restart: unless-stopped
 
@@ -56,6 +71,7 @@ networks:
 volumes:
   postgres:
   backend:
+  frontend:
   pgadmin:
 
 secrets:
