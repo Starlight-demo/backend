@@ -76,7 +76,7 @@ class SecurityConfiguration {
                 .requestMatchers(antMatcher("/api/v1/proofs/**")).permitAll()
                 .requestMatchers("/api/v1/sponsors/recovery-account").permitAll()
                 /////////////////////////Another///////////////////////////////////////////////////
-                .requestMatchers("/**").hasAuthority("ROLE_ADMIN")
+                .requestMatchers(antMatcher("/**")).hasAuthority("ROLE_ADMIN")
                 /////////////////////////Another///////////////////////////////////////////////////
                 .anyRequest().authenticated()
         );
