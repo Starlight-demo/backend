@@ -4,12 +4,15 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import starlight.backend.user.model.entity.UserEntity;
 
-import java.util.Optional;
-
 @Repository
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
-    boolean existsByTalentSkills_SkillId(Long skillId);
-    boolean existsByEmail(String email);
+    boolean existsByAdmin_Email(String email);
+    UserEntity findByAdmin_Email(String email);
+    UserEntity findByTalent_Email(String email);
 
-    Optional<UserEntity> findByEmail(String email);
+    UserEntity findBySponsor_Email(String email);
+
+    boolean existsByTalent_Email(String email);
+
+    boolean existsBySponsor_Email(String email);
 }

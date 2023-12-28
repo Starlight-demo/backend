@@ -9,9 +9,9 @@ import org.hibernate.validator.constraints.URL;
 import org.springframework.validation.annotation.Validated;
 import starlight.backend.kudos.model.entity.KudosEntity;
 import starlight.backend.sponsor.model.enums.SponsorStatus;
+import starlight.backend.user.model.entity.UserEntity;
 
 import java.time.Instant;
-import java.util.Collection;
 import java.util.List;
 
 import static jakarta.persistence.GenerationType.IDENTITY;
@@ -23,6 +23,7 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 @NoArgsConstructor
 @Entity
 @Validated
+@Table(name = "sponsor")
 public class SponsorEntity {
     @Id
     @GeneratedValue(strategy = IDENTITY)
@@ -42,9 +43,9 @@ public class SponsorEntity {
     private Instant expiryDate;
     @Enumerated(EnumType.STRING)
     private SponsorStatus status;
-    @ElementCollection(fetch = FetchType.EAGER)
-    private Collection<String> authorities;
     @OneToMany(mappedBy = "owner")
     @JsonManagedReference
     private List<KudosEntity> kudos;
+    @OneToOne(mappedBy = "sponsor")
+    private UserEntity user;
 }

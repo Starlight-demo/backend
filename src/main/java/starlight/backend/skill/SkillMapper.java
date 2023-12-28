@@ -8,8 +8,8 @@ import starlight.backend.skill.model.response.SkillList;
 import starlight.backend.skill.model.response.SkillListWithPagination;
 import starlight.backend.skill.model.response.SkillWithCategory;
 import starlight.backend.talent.model.response.TalentWithSkills;
-import starlight.backend.user.model.entity.PositionEntity;
-import starlight.backend.user.model.entity.UserEntity;
+import starlight.backend.talent.model.entity.PositionEntity;
+import starlight.backend.talent.model.entity.TalentEntity;
 
 import java.util.List;
 
@@ -42,30 +42,30 @@ public interface SkillMapper {
                 .build();
     }
 
-    default ProofWithSkills toProofWithSkills(ProofEntity proofEntity) {
+    default ProofWithSkills toProofWithSkills(ProofEntity proof) {
         return ProofWithSkills.builder()
-                .title(proofEntity.getTitle())
-                .link(proofEntity.getLink())
-                .status(proofEntity.getStatus())
-                .description(proofEntity.getDescription())
-                .dateLastUpdated(proofEntity.getDateLastUpdated())
-                .dateCreated(proofEntity.getDateCreated())
-                .skill(proofEntity.getSkills()
+                .title(proof.getTitle())
+                .link(proof.getLink())
+                .status(proof.getStatus())
+                .description(proof.getDescription())
+                .dateLastUpdated(proof.getDateLastUpdated())
+                .dateCreated(proof.getDateCreated())
+                .skill(proof.getSkills()
                         .stream()
                         .map(this::toSkillWithCategory)
                         .toList())
                 .build();
     }
 
-    default TalentWithSkills toTalentWithSkills(UserEntity user) {
+    default TalentWithSkills toTalentWithSkills(TalentEntity talent) {
         return TalentWithSkills.builder()
-                .id(user.getUserId())
-                .fullName(user.getFullName())
-                .position(user.getPositions().stream()
+                .id(talent.getTalentId())
+                .fullName(talent.getFullName())
+                .position(talent.getPositions().stream()
                         .findAny()
                         .map(PositionEntity::getPosition)
                         .orElse(null))
-                .skill(user.getTalentSkills()
+                .skill(talent.getTalentSkills()
                         .stream()
                         .map(this::toSkillWithCategory)
                         .toList())

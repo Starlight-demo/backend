@@ -108,7 +108,7 @@ public class TalentControllerV1 {
             @ApiResponse(responseCode = "404", description = "Not found"),
             @ApiResponse(responseCode = "409", description = "Conflict")
     })
-    @PreAuthorize("hasRole('TALENT')")
+    @PreAuthorize("hasRole('TALENT') or hasRole('ADMIN')")
     @PatchMapping("/talents/{talent-id}")
     public TalentFullInfo updateTalentFullInfo(@PathVariable("talent-id") long talentId,
                                                @RequestBody TalentUpdateRequest talentUpdateRequest,
@@ -133,7 +133,7 @@ public class TalentControllerV1 {
             @ApiResponse(responseCode = "403", description = "Forbidden"),
             @ApiResponse(responseCode = "409", description = "Conflict")
     })
-    @PreAuthorize("hasRole('TALENT')")
+    @PreAuthorize("hasRole('TALENT') or hasRole('ADMIN')")
     @DeleteMapping("/talents/{talent-id}")
     public void deleteTalent(@PathVariable("talent-id") long talentId,
                              Authentication auth) {

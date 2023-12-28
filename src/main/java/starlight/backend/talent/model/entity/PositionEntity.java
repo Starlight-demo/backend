@@ -1,10 +1,7 @@
-package starlight.backend.user.model.entity;
+package starlight.backend.talent.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.Set;
@@ -18,6 +15,7 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Table(name  = "position")
 public class PositionEntity {
     @Id
     @GeneratedValue(strategy = IDENTITY)
@@ -27,7 +25,7 @@ public class PositionEntity {
 
     @ManyToMany(mappedBy = "positions")
     @JsonBackReference
-    private Set<UserEntity> users;
+    private Set<TalentEntity> users;
 
     public PositionEntity(String position) {
         this.position = position;

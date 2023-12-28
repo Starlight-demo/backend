@@ -1,8 +1,8 @@
-package starlight.backend.user.repository;
+package starlight.backend.talent.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import starlight.backend.user.model.entity.PositionEntity;
+import starlight.backend.talent.model.entity.PositionEntity;
 
 @Repository
 public interface PositionRepository extends JpaRepository<PositionEntity, Long> {

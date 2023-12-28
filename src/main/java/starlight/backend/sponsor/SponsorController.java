@@ -62,7 +62,7 @@ public class SponsorController {
     }
     )
     @GetMapping("/sponsors/{sponsor-id}")
-    @PreAuthorize("hasRole('SPONSOR')")
+    @PreAuthorize("hasRole('SPONSOR') or hasRole('ADMIN')")
     public SponsorFullInfo sponsorFullInfo(@PathVariable("sponsor-id") long sponsorId,
                                            Authentication auth) {
         log.info("@GetMapping(\"/sponsors/{sponsor-id}\")");
@@ -87,7 +87,7 @@ public class SponsorController {
             @ApiResponse(responseCode = "404", description = "Not found"),
             @ApiResponse(responseCode = "409", description = "Conflict")
     })
-    @PreAuthorize("hasRole('SPONSOR')")
+    @PreAuthorize("hasRole('SPONSOR') or hasRole('ADMIN')")
     @PatchMapping("/sponsors/{sponsor-id}")
     public SponsorFullInfo updateSponsorFullInfo(@PathVariable("sponsor-id") long sponsorId,
                                                  @RequestBody SponsorUpdateRequest sponsorUpdateRequest,
@@ -108,7 +108,7 @@ public class SponsorController {
             @ApiResponse(responseCode = "404", description = "Sponsor not found")
     })
     @Tag(name = "Delete", description = "Delete sponsor")
-    @PreAuthorize("hasRole('ROLE_SPONSOR')")
+    @PreAuthorize("hasRole('ROLE_SPONSOR') or hasRole('ADMIN')")
     @DeleteMapping("/sponsors/{sponsor-id}")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<String> deleteSponsor(@PathVariable("sponsor-id") long sponsorId, Authentication auth) {
@@ -127,7 +127,7 @@ public class SponsorController {
     }
     )
     @Tag(name = "Delete")
-    @PreAuthorize("hasRole('ROLE_SPONSOR')")
+    @PreAuthorize("hasRole('ROLE_SPONSOR') or hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.OK)
     @PostMapping("/sponsors/{sponsor-id}/send-recovery-account-email")
     public ResponseEntity<String> sendEmailForRecoverySponsorAccount(@PathVariable("sponsor-id") long sponsorId,

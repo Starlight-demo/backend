@@ -145,7 +145,7 @@ public class ProofControllerV2 {
                     )
             )
     })
-    @PreAuthorize("hasRole('TALENT')")
+    @PreAuthorize("hasRole('TALENT') or hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/talents/{talent-id}/proofs")
     public ResponseEntity<?> addProofFullInfo(@PathVariable("talent-id") long talentId,

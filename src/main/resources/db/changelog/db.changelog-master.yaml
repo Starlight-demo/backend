@@ -12,10 +12,6 @@ databaseChangeLog:
       relativeToChangelogFile: true
 
   - include:
-      file: dml/002_insert_data_auth.sql
-      relativeToChangelogFile: true
-
-  - include:
       file: dml/003_insert_data_position.sql
       relativeToChangelogFile: true
 
@@ -101,4 +97,12 @@ databaseChangeLog:
 
   - changeSet:
       id: 19
+      author: kate
+
+  - changeSet:
+      id: 20
+      author: kate
+
+  - changeSet:
+      id: 21
       author: kate

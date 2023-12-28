@@ -3,6 +3,8 @@ package starlight.backend.security;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -10,7 +12,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -24,8 +25,6 @@ import org.springframework.security.oauth2.server.resource.web.access.BearerToke
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import starlight.backend.security.model.UserDetailsImpl;
-import starlight.backend.sponsor.SponsorRepository;
 import starlight.backend.user.repository.UserRepository;
 
 import java.security.KeyPair;
@@ -40,7 +39,10 @@ import static org.springframework.security.web.util.matcher.AntPathRequestMatche
 @EnableWebSecurity
 @EnableMethodSecurity
 @Configuration
+@AllArgsConstructor
 class SecurityConfiguration {
+    private MapperSecurity mapper;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(c -> c
@@ -64,13 +66,17 @@ class SecurityConfiguration {
                 .requestMatchers("/api/v1/skills").permitAll()
                 .requestMatchers("/api/v1/talents").permitAll()
                 .requestMatchers("/api/v1/sponsors").permitAll()
+                .requestMatchers("/api/v1/admin").permitAll()
                 .requestMatchers("/api/v2/talents").permitAll()
                 .requestMatchers("/api/v1/proofs").permitAll()
                 .requestMatchers("/api/v2/proofs").permitAll()
                 .requestMatchers(POST, "/api/v1/talents/login").permitAll()
                 .requestMatchers(POST, "/api/v1/sponsors/login").permitAll()
+                .requestMatchers(POST, "/api/v1/admin/login").permitAll()
                 .requestMatchers(antMatcher("/api/v1/proofs/**")).permitAll()
                 .requestMatchers("/api/v1/sponsors/recovery-account").permitAll()
+                /////////////////////////Another///////////////////////////////////////////////////
+                .requestMatchers(antMatcher("/**")).hasAuthority("ROLE_ADMIN")
                 /////////////////////////Another///////////////////////////////////////////////////
                 .anyRequest().authenticated()
         );
@@ -134,18 +140,14 @@ class SecurityConfiguration {
     }
 
     @Bean
-    UserDetailsService userDetailsService(
-            UserRepository userRepository, SponsorRepository sponsorRepository
-    ) {
+    UserDetailsService userDetailsService(UserRepository userRepository) {
         return email -> {
-            if (userRepository.existsByEmail(email)) {
-                return userRepository.findByEmail(email)
-                        .map(user -> new UserDetailsImpl(user.getEmail(), user.getPassword()))
-                        .orElseThrow(() -> new UsernameNotFoundException(email + " not found user by email"));
-            } else {
-                return sponsorRepository.findByEmail(email)
-                        .map(sponsor -> new UserDetailsImpl(sponsor.getEmail(), sponsor.getPassword()))
-                        .orElseThrow(() -> new UsernameNotFoundException(email + " not found user by email"));
+            if (userRepository.existsByAdmin_Email(email)) {
+                return mapper.toUserDetailsImplAdmin(userRepository.findByAdmin_Email(email));
+            }else if(userRepository.existsBySponsor_Email(email)){
+                return mapper.toUserDetailsImplSponsor(userRepository.findBySponsor_Email(email));
+            }else {
+                return mapper.toUserDetailsImplTalent(userRepository.findByTalent_Email(email));
             }
         };
     }

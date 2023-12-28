@@ -46,7 +46,7 @@ public class SkillControllerV2 {
             @ApiResponse(responseCode = "404", description = "Not found"),
             @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
-    @PreAuthorize("hasRole('TALENT')")
+    @PreAuthorize("hasRole('TALENT') or hasRole('ADMIN')")
     @PostMapping("talents/{talent-id}/skills")
     public TalentWithSkills addSkillToTalent(@PathVariable("talent-id") long talentId,
                                              @RequestBody AddSkill skills,
@@ -75,7 +75,7 @@ public class SkillControllerV2 {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "403", description = "Forbidden")
     })
-    @PreAuthorize("hasRole('TALENT')")
+    @PreAuthorize("hasRole('TALENT') or hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/talents/{talent-id}/proofs/{proof-id}/skills")
     public ProofWithSkills addSkillInProof(@PathVariable("talent-id") long talentId,

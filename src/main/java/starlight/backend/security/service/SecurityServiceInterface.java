@@ -22,7 +22,11 @@ public interface SecurityServiceInterface {
 
     String createScope(UserDetailsImpl authentication);
 
-    SessionInfo loginSponsor(Authentication auth);
-
     SessionInfo registerSponsor(NewUser newUser);
+
+    SessionInfo registerAdmin(NewUser newUser);
+
+    SessionInfo loginInfoSponsor(Authentication auth);
+
+    SessionInfo loginInfoAdmin(Authentication auth);
 }

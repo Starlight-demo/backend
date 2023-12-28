@@ -77,7 +77,7 @@ public class SkillController {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "403", description = "Forbidden")
     })
-    @PreAuthorize("hasRole('TALENT')")
+    @PreAuthorize("hasRole('TALENT') or hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/talents/{talent-id}/proofs/{proof-id}/skills")
     public ProofWithSkills addSkillInProof(@PathVariable("talent-id") long talentId,
@@ -125,7 +125,7 @@ public class SkillController {
             @ApiResponse(responseCode = "404", description = "Not found"),
             @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
-    @PreAuthorize("hasRole('TALENT')")
+    @PreAuthorize("hasRole('TALENT') or hasRole('ADMIN')")
     @DeleteMapping("/talents/{talent-id}/proofs/{proof-id}/skills/{skill-id}")
     public void deleteSkill(@PathVariable("talent-id") long talentId,
                             @PathVariable("proof-id") long proofId,
@@ -149,7 +149,7 @@ public class SkillController {
             @ApiResponse(responseCode = "404", description = "Not found"),
             @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
-    @PreAuthorize("hasRole('TALENT')")
+    @PreAuthorize("hasRole('TALENT') or hasRole('ADMIN')")
     @DeleteMapping("/talents/{talent-id}/proofs/{proof-id}/skills")
     public void deleteSkillArray(@PathVariable("talent-id") long talentId,
                                  @PathVariable("proof-id") long proofId,
@@ -174,7 +174,7 @@ public class SkillController {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "400", description = "Bad Request")
     })
-    @PreAuthorize("hasRole('TALENT')")
+    @PreAuthorize("hasRole('TALENT') or hasRole('ADMIN')")
     @DeleteMapping("talents/{talent-id}/skills")
     public void deleteSkills(@PathVariable("talent-id") long talentId,
                                 @RequestBody DeleteIdSkills skillId,

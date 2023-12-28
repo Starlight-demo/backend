@@ -76,7 +76,7 @@ public class ProofControllerV1 {
             @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
 
-    @PreAuthorize("hasRole('TALENT')")
+    @PreAuthorize("hasRole('TALENT') or hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/talents/{talent-id}/proofs")
     public ResponseEntity<?> addProofFullInfo(@PathVariable("talent-id") long talentId,
@@ -96,7 +96,7 @@ public class ProofControllerV1 {
             @ApiResponse(responseCode = "403", description = "Forbidden"),
             @ApiResponse(responseCode = "409", description = "Conflict")
     })
-    @PreAuthorize("hasRole('TALENT')")
+    @PreAuthorize("hasRole('TALENT') or hasRole('ADMIN')")
     @DeleteMapping("/talents/{talent-id}/proofs/{proof-id}")
     public void deleteTalent(@PathVariable("talent-id") long talentId,
                              @PathVariable("proof-id") long proofId,
@@ -129,7 +129,7 @@ public class ProofControllerV1 {
             @ApiResponse(responseCode = "404", description = "Not found")
     })
     @PatchMapping("/talents/{talent-id}/proofs/{proof-id}")
-    @PreAuthorize("hasRole('TALENT')")
+    @PreAuthorize("hasRole('TALENT') or hasRole('ADMIN')")
     public ProofFullInfo updateProofFullInfo(@PathVariable("talent-id") long talentId,
                                              @PathVariable("proof-id") long proofId,
                                              @RequestBody ProofUpdateRequest proofUpdateRequest,

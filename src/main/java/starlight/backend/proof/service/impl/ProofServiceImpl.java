@@ -35,7 +35,7 @@ import starlight.backend.proof.model.response.ProofPagePaginationWithSkills;
 import starlight.backend.proof.service.ProofServiceInterface;
 import starlight.backend.security.service.SecurityServiceInterface;
 import starlight.backend.skill.service.SkillServiceInterface;
-import starlight.backend.user.repository.UserRepository;
+import starlight.backend.talent.repository.TalentRepository;
 
 import java.net.URI;
 import java.time.Instant;
@@ -50,7 +50,7 @@ import java.util.regex.Pattern;
 public class ProofServiceImpl implements ProofServiceInterface {
     private final String DATA_CREATED = "dateCreated";
     private ProofRepository repository;
-    private UserRepository userRepository;
+    private TalentRepository talentRepository;
     private ProofMapper mapper;
     private KudosRepository kudosRepository;
     private SecurityServiceInterface securityService;
@@ -97,12 +97,12 @@ public class ProofServiceImpl implements ProofServiceInterface {
                                          ProofAddWithSkillsRequest proofAddWithSkillsRequest,
                                          Authentication auth) {
 
-        var talent = userRepository.findById(talentId)
+        var talent = talentRepository.findById(talentId)
                 .orElseThrow(() -> new ProofNotFoundException(talentId));
         talent.setTalentSkills(skillService.existsSkill(
                 talent.getTalentSkills(),
                 proofAddWithSkillsRequest.skills()));
-        userRepository.save(talent);
+        talentRepository.save(talent);
 
         var proof = repository.save(ProofEntity.builder()
                 .title(proofAddWithSkillsRequest.title())
@@ -110,7 +110,7 @@ public class ProofServiceImpl implements ProofServiceInterface {
                 .link(proofAddWithSkillsRequest.link())
                 .status(Status.DRAFT)
                 .dateCreated(Instant.now())
-                .user(userRepository.findById(talentId)
+                .talent(talentRepository.findById(talentId)
                         .orElseThrow(() -> new TalentNotFoundException(talentId)))
                 .skills(proofAddWithSkillsRequest.skills().stream()
                         .map(skill -> skillService.skillValidation(skill))
@@ -143,7 +143,7 @@ public class ProofServiceImpl implements ProofServiceInterface {
                 .link(proofAddRequest.link())
                 .status(Status.DRAFT)
                 .dateCreated(Instant.now())
-                .user(userRepository.findById(talentId)
+                .talent(talentRepository.findById(talentId)
                         .orElseThrow(() -> new TalentNotFoundException(talentId)))
                 .build());
     }
@@ -169,12 +169,12 @@ public class ProofServiceImpl implements ProofServiceInterface {
         if (!securityService.checkingLoggedAndToken(talentId, auth)) {
             throw new UserAccesDeniedToProofException();
         }
-        if (!repository.existsByUser_UserIdAndProofId(talentId, id)) {
+        if (!repository.existsByTalent_TalentIdAndProofId(talentId, id)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "don`t have that talent");
         }
         var proofEntity = repository.findById(id)
                 .orElseThrow(() -> new ProofNotFoundException(id));
-        var talent = userRepository.findById(talentId)
+        var talent = talentRepository.findById(talentId)
                 .orElseThrow(() -> new UserNotFoundException(id));
         if (!proofEntity.getStatus().equals(Status.DRAFT)
                 && proofUpdateRequest.status().equals(Status.DRAFT)) {
@@ -193,7 +193,7 @@ public class ProofServiceImpl implements ProofServiceInterface {
         talent.setTalentSkills(skillService.existsSkill(
                 proofEntity.getSkills(),
                 proofUpdateRequest.skills()));
-        userRepository.save(talent);
+        talentRepository.save(talent);
         proofEntity.setDateLastUpdated(Instant.now());
         repository.save(proofEntity);
         return mapper.toProofFullInfo(proofEntity);
@@ -228,7 +228,7 @@ public class ProofServiceImpl implements ProofServiceInterface {
         }
         ProofEntity proof = repository.findById(proofId)
                 .orElseThrow(() -> new ProofNotFoundException(proofId));
-        proof.setUser(null);
+        proof.setTalent(null);
         for (KudosEntity kudos : kudosRepository.findByProof_ProofId(proofId)) {
             kudos.setProof(null);
             kudos.setOwner(null);
@@ -269,10 +269,10 @@ public class ProofServiceImpl implements ProofServiceInterface {
                                                         boolean sort, String status) {
         isStatusCorrect(status);
         return (status.equals(Status.ALL.getStatus())) ?
-                repository.findByUser_UserId(talentId,
+                repository.findByTalent_TalentId(talentId,
                         PageRequest.of(page, size, doSort(sort, DATA_CREATED)))
                 :
-                repository.findByUser_UserIdAndStatus(talentId, Status.valueOf(status),
+                repository.findByTalent_TalentIdAndStatus(talentId, Status.valueOf(status),
                         PageRequest.of(page, size, doSort(sort, DATA_CREATED)));
     }
 
@@ -280,7 +280,7 @@ public class ProofServiceImpl implements ProofServiceInterface {
     public ProofFullInfo getProofFullInfo(Authentication auth, long proofId) {
         ProofEntity proof = repository.findById(proofId)
                 .orElseThrow(() -> new ProofNotFoundException(proofId));
-        var talentId = proof.getUser().getUserId();
+        var talentId = proof.getTalent().getTalentId();
         if (securityService.checkingLoggedAndToken(talentId, auth)) {
             return mapper.toProofFullInfo(proof);
         } else if (proof.getStatus().equals(Status.PUBLISHED)) {
@@ -293,7 +293,7 @@ public class ProofServiceImpl implements ProofServiceInterface {
     public ProofFullInfoWithSkills getProofFullInfoWithSkills(Authentication auth, long proofId) {
         ProofEntity proof = repository.findById(proofId)
                 .orElseThrow(() -> new ProofNotFoundException(proofId));
-        var talentId = proof.getUser().getUserId();
+        var talentId = proof.getTalent().getTalentId();
         if (securityService.checkingLoggedAndToken(talentId, auth)) {
             return mapper.toProofFullInfoWithSkills(proof);
         } else if (proof.getStatus().equals(Status.PUBLISHED)) {

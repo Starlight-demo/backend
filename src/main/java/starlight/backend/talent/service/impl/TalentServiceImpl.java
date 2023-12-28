@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import starlight.backend.exception.PageNotFoundException;
 import starlight.backend.exception.proof.InvalidStatusException;
-import starlight.backend.exception.proof.UserAccesDeniedToProofException;
 import starlight.backend.exception.user.UserAccesDeniedToDeleteThisUserException;
 import starlight.backend.exception.user.UserNotFoundException;
 import starlight.backend.exception.user.talent.TalentNotFoundException;
@@ -22,18 +21,16 @@ import starlight.backend.proof.ProofRepository;
 import starlight.backend.proof.model.entity.ProofEntity;
 import starlight.backend.proof.model.enums.Status;
 import starlight.backend.security.service.SecurityServiceInterface;
-import starlight.backend.skill.SkillMapper;
-import starlight.backend.skill.repository.SkillRepository;
 import starlight.backend.talent.MapperTalent;
+import starlight.backend.talent.model.entity.PositionEntity;
+import starlight.backend.talent.model.entity.TalentEntity;
 import starlight.backend.talent.model.request.TalentUpdateRequest;
 import starlight.backend.talent.model.response.TalentFullInfo;
 import starlight.backend.talent.model.response.TalentPagePagination;
 import starlight.backend.talent.model.response.TalentPagePaginationWithFilterSkills;
+import starlight.backend.talent.repository.PositionRepository;
+import starlight.backend.talent.repository.TalentRepository;
 import starlight.backend.talent.service.TalentServiceInterface;
-import starlight.backend.user.model.entity.PositionEntity;
-import starlight.backend.user.model.entity.UserEntity;
-import starlight.backend.user.repository.PositionRepository;
-import starlight.backend.user.repository.UserRepository;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -46,19 +43,17 @@ import java.util.stream.Collectors;
 public class TalentServiceImpl implements TalentServiceInterface {
     private KudosRepository kudosRepository;
     private MapperTalent talentMapper;
-    private UserRepository userRepository;
+    private TalentRepository talentRepository;
     private PositionRepository positionRepository;
     private SecurityServiceInterface securityService;
     private ProofRepository proofRepository;
     private PasswordEncoder passwordEncoder;
-    private SkillRepository skillRepository;
-    private SkillMapper skillMapper;
-    private final String filterParam = "userId";
+    private final String filterParam = "talentId";
 
     @Override
     public TalentPagePagination talentPagination(int page, int size) {
-        var pageRequest = userRepository.findAll(
-                PageRequest.of(page, size, Sort.by("userId").descending())
+        var pageRequest = talentRepository.findAll(
+                PageRequest.of(page, size, Sort.by(filterParam).descending())
         );
         if (page >= pageRequest.getTotalPages())
             throw new PageNotFoundException(page);
@@ -67,7 +62,7 @@ public class TalentServiceImpl implements TalentServiceInterface {
 
     @Override
     public TalentFullInfo talentFullInfo(long id) {
-        return userRepository.findById(id)
+        return talentRepository.findById(id)
                 .map(talentMapper::toTalentFullInfo)
                 .orElseThrow(() -> new TalentNotFoundException(id));
     }
@@ -77,7 +72,7 @@ public class TalentServiceImpl implements TalentServiceInterface {
         if (!securityService.checkingLoggedAndToken(id, auth)) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "you cannot change another talent");
         }
-        return userRepository.findById(id).map(talent -> {
+        return talentRepository.findById(id).map(talent -> {
             talent.setFullName(validationField(
                     talentUpdateRequest.fullName(),
                     talent.getFullName()));
@@ -101,7 +96,7 @@ public class TalentServiceImpl implements TalentServiceInterface {
             talent.setPositions(validationPosition(
                     talent.getPositions(),
                     talentUpdateRequest.positions()));
-            userRepository.save(talent);
+            talentRepository.save(talent);
             return talentMapper.toTalentFullInfo(talent);
         }).orElseThrow(() -> new TalentNotFoundException(id));
     }
@@ -117,23 +112,23 @@ public class TalentServiceImpl implements TalentServiceInterface {
         if (positions == null) {
             return Collections.emptySet();
         }
-            Set<PositionEntity> newPosition = positions.stream()
-                    .map(position -> {
-                        if (position != null && !position.isEmpty()) {
-                            PositionEntity pos;
-                            if (positionRepository.existsByPositionIgnoreCase(position)) {
-                                pos = positionRepository.findByPosition(position);
-                            } else {
-                                pos = new PositionEntity(position);
-                            }
-                            return pos;
+        Set<PositionEntity> newPosition = positions.stream()
+                .map(position -> {
+                    if (position != null && !position.isEmpty()) {
+                        PositionEntity pos;
+                        if (positionRepository.existsByPositionIgnoreCase(position)) {
+                            pos = positionRepository.findByPosition(position);
+                        } else {
+                            pos = new PositionEntity(position);
                         }
-                        return null;
-                    })
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toSet());
-            //newPosition.addAll(talentPositions);
-            return !newPosition.isEmpty() ? newPosition : talentPositions;
+                        return pos;
+                    }
+                    return null;
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        //newPosition.addAll(talentPositions);
+        return !newPosition.isEmpty() ? newPosition : talentPositions;
 //            TODO: add delete endpoint for delete positions
     }
 
@@ -142,32 +137,31 @@ public class TalentServiceImpl implements TalentServiceInterface {
         if (!securityService.checkingLoggedAndToken(talentId, auth)) {
             throw new UserAccesDeniedToDeleteThisUserException(talentId);
         }
-        UserEntity user = userRepository.findById(talentId)
+        TalentEntity talent = talentRepository.findById(talentId)
                 .orElseThrow(() -> new UserNotFoundException(talentId));
-        user.getPositions().clear();
-        user.getAuthorities().clear();
-        user.getTalentSkills().clear();
-        if (!user.getProofs().isEmpty()) {
-            for (ProofEntity proof : proofRepository.findByUser_UserId(talentId)) {
-                proof.setUser(null);
+        talent.getPositions().clear();
+        talent.getTalentSkills().clear();
+        if (!talent.getProofs().isEmpty()) {
+            for (ProofEntity proof : proofRepository.findByTalent_TalentId(talentId)) {
+                proof.setTalent(null);
                 proof.getSkills().clear();
                 proof.getKudos().clear();
                 kudosRepository.deleteAll(proof.getKudos());
                 proofRepository.deleteById(proof.getProofId());
             }
         }
-        user.getProofs().clear();
-        userRepository.deleteById(user.getUserId());
+        talent.getProofs().clear();
+        talentRepository.deleteById(talent.getTalentId());
     }
 
 
     @Override
     public TalentPagePaginationWithFilterSkills talentPaginationWithFilter(String filter, int skip, int limit) {
-        var talentStream = userRepository.findAll(
+        var talentStream = talentRepository.findAll(
                 PageRequest.of(skip, limit, Sort.by(filterParam).descending()));
 
         if (!filter.isEmpty()) {
-            List<UserEntity> filteredTalents = talentStream.stream()
+            List<TalentEntity> filteredTalents = talentStream.stream()
                     .filter(talent -> talent.getTalentSkills().stream()
                             .anyMatch(skill -> skill.getSkill()
                                     .toLowerCase()

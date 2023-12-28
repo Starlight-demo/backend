@@ -101,7 +101,7 @@ public class SecurityController {
     @ResponseStatus(HttpStatus.OK)
     public SessionInfo loginSponsor(Authentication auth) {
         log.info("@PostMapping(\"/sponsors/login\")");
-        return service.loginSponsor(auth);
+        return service.loginInfoSponsor(auth);
     }
 
     @Operation(
@@ -130,5 +130,18 @@ public class SecurityController {
     public SessionInfo registerSponsor(@Valid @RequestBody NewUser newUser) {
         log.info("@PostMapping(\"/sponsors\")");
         return service.registerSponsor(newUser);
+    }
+
+    @PostMapping("/admin")
+    @ResponseStatus(HttpStatus.CREATED)
+    public SessionInfo registerAdmin(@Valid @RequestBody NewUser newUser) {
+        log.info("@PostMapping(\"/admin\")");
+        return service.registerAdmin(newUser);
+    }
+
+    @PostMapping("/admin/login")
+    public SessionInfo loginAdmin(Authentication auth) {
+        log.info("@PostMapping(\"/admin/login\")");
+        return service.loginInfoAdmin(auth);
     }
 }

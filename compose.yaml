@@ -1,0 +1,80 @@
+version: '3.5'
+services:
+  backend:
+    container_name: "Backend"
+    image: sekret3d/starlight_backend:dev
+    volumes:
+      - backend:/data/backend
+    ports:
+      - '8082:8082'
+    networks:
+      - starlight-network
+    secrets:
+      - backend_secrets
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+
+    restart: unless-stopped
+
+  frontend:
+    container_name: "Frontend"
+    image: sekret3d/starlight_frontend:main
+    volumes:
+      - frontend:/data/frontend
+    ports:
+      - '3000:3000'
+    networks:
+      - starlight-network
+    depends_on:
+      - postgres
+#      - backend
+
+    restart: unless-stopped
+
+  postgres:
+    container_name: "PSQL_PROD"
+    image: postgres
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USERNAME: postgres
+      POSTGRES_PASSWORD: 123456
+      PGGATA: /data/postgres
+    volumes:
+      - postgres:/data/postgres
+    ports:
+      - '5432:5432'
+    networks:
+      - starlight-network
+    restart: unless-stopped
+
+  pgadmin:
+    container_name: "pgadmin_prod"
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: sekret7d@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: serg12345
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+    ports:
+      - "5050:80"
+    networks:
+      - starlight-network
+    restart: unless-stopped
+
+networks:
+  starlight-network:
+    name: starlight-network
+    driver: bridge
+
+volumes:
+  postgres:
+  backend:
+  frontend:
+  pgadmin:
+
+secrets:
+  backend_secrets:
+    file: .env

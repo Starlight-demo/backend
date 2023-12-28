@@ -46,7 +46,6 @@ public class AdviceServiceImpl implements AdviceService {
                     .orElseThrow(() -> new SponsorNotFoundException(accountEntityID));
             //Чистим связи с другими таблицами.
             //Чистим роли
-            sponsor.getAuthorities().clear();
             if (!sponsor.getKudos().isEmpty()) {
                 //Если есть кудосы, то очищяем владельцев каждого из них
                 for (var kudos : sponsor.getKudos()) {

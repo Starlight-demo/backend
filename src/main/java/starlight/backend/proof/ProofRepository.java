@@ -12,19 +12,20 @@ import java.util.List;
 
 @Repository
 public interface ProofRepository extends JpaRepository<ProofEntity, Long> {
-    boolean existsByUser_UserIdAndSkills_SkillId(Long userId, Long skillId);
 
-    List<ProofEntity> findByUser_UserIdAndSkills_SkillId(Long userId, Long skillId);
+    boolean existsByTalent_TalentIdAndSkills_SkillId(Long talentId, Long skillId);
 
-    List<ProofEntity> findByUser_UserIdAndSkills_SkillIdAndStatus(Long userId, Long skillId, Status status);
+    List<ProofEntity> findByTalent_TalentIdAndSkills_SkillId(Long talentId, Long skillId);
 
-    Page<ProofEntity> findByUser_UserIdAndStatus(Long userId, Status status, Pageable pageable);
+    List<ProofEntity> findByTalent_TalentIdAndSkills_SkillIdAndStatus(Long talentId, Long skillId, Status status);
+
+    Page<ProofEntity> findByTalent_TalentIdAndStatus(Long talentId, Status status, Pageable pageable);
 
     Page<ProofEntity> findByStatus(Status status, Pageable pageable);
 
-    boolean existsByUser_UserIdAndProofId(Long userId, Long proofId);
+    boolean existsByTalent_TalentIdAndProofId(Long talentId, Long proofId);
 
-    Page<ProofEntity> findByUser_UserId(long talentId, PageRequest of);
+    Page<ProofEntity> findByTalent_TalentId(long talentId, PageRequest of);
 
-    List<ProofEntity> findByUser_UserId(long talentId);
+    List<ProofEntity> findByTalent_TalentId(Long talentId);
 }

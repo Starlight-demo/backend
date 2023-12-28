@@ -20,12 +20,12 @@ import starlight.backend.kudos.repository.KudosRepository;
 import starlight.backend.kudos.service.KudosServiceInterface;
 import starlight.backend.proof.ProofRepository;
 import starlight.backend.proof.model.entity.ProofEntity;
-import starlight.backend.security.model.enums.Role;
+import starlight.backend.user.model.enums.Role;
 import starlight.backend.security.service.SecurityServiceInterface;
 import starlight.backend.sponsor.SponsorRepository;
 import starlight.backend.sponsor.model.entity.SponsorEntity;
-import starlight.backend.user.model.entity.UserEntity;
-import starlight.backend.user.repository.UserRepository;
+import starlight.backend.talent.model.entity.TalentEntity;
+import starlight.backend.talent.repository.TalentRepository;
 
 import java.time.Instant;
 import java.util.stream.Collectors;
@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
 public class KudosServiceImpl implements KudosServiceInterface {
     private KudosRepository kudosRepository;
     private ProofRepository proofRepository;
-    private UserRepository userRepository;
+    private TalentRepository talentRepository;
     private SponsorRepository sponsorRepository;
     private SecurityServiceInterface securityService;
 
@@ -111,7 +111,7 @@ public class KudosServiceImpl implements KudosServiceInterface {
         if (kudosRequest > owner.getUnusedKudos()) {
             throw new NotEnoughKudosException();
         }
-        var follower = userRepository.findById(proof.getUser().getUserId())
+        var follower = talentRepository.findById(proof.getTalent().getTalentId())
                 .orElseThrow(() -> new UserNotFoundException(auth.getName()));
         updateSponsorUnusedKudos(owner, kudosRequest);
         return updateSponsorKudosField(proof, follower, owner, kudosRequest, proofId);
@@ -125,14 +125,14 @@ public class KudosServiceImpl implements KudosServiceInterface {
         });
     }
 
-    private KudosEntity updateSponsorKudosField(ProofEntity proof, UserEntity follower, SponsorEntity owner,
+    private KudosEntity updateSponsorKudosField(ProofEntity proof, TalentEntity follower, SponsorEntity owner,
                                                 int kudosRequest, long proofId) {
         if (proof.getKudos().stream()
                 .filter(kudos1 -> kudos1.getOwner().getSponsorId().equals(owner.getSponsorId()))
                 .collect(Collectors.toSet()).isEmpty()) {
             if (kudosRequest < 0) throw new YouCanNotReturnMoreKudosThanGaveException();
             var kudosBuild = KudosEntity.builder()
-                    .followerId(follower.getUserId())
+                    .followerId(follower.getTalentId())
                     .createData(Instant.now())
                     .proof(proof)
                     .owner(owner)

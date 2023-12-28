@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Pattern;
 import lombok.Builder;
 import org.hibernate.validator.constraints.Length;
 import org.springframework.validation.annotation.Validated;
+import starlight.backend.user.model.enums.Role;
 
 
 @Builder

@@ -10,7 +10,7 @@ import org.springframework.validation.annotation.Validated;
 import starlight.backend.kudos.model.entity.KudosEntity;
 import starlight.backend.proof.model.enums.Status;
 import starlight.backend.skill.model.entity.SkillEntity;
-import starlight.backend.user.model.entity.UserEntity;
+import starlight.backend.talent.model.entity.TalentEntity;
 
 import java.time.Instant;
 import java.util.List;
@@ -26,6 +26,7 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 @NoArgsConstructor
 @Entity
 @Validated
+@Table(name  = "proof")
 public class ProofEntity {
     @Id
     @GeneratedValue(strategy = IDENTITY)
@@ -47,8 +48,8 @@ public class ProofEntity {
     private Status status;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private UserEntity user;
+    @JoinColumn(name = "talent_id", nullable = false)
+    private TalentEntity talent;
 
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
     @JoinTable(

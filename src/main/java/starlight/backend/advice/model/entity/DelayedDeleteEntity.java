@@ -18,6 +18,7 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 @NoArgsConstructor
 @Entity
 @Validated
+@Table(name = "delayed_delete")
 public class DelayedDeleteEntity {
     @Id
     @GeneratedValue(strategy = IDENTITY)

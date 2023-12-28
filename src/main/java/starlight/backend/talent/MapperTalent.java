@@ -5,46 +5,46 @@ import org.springframework.data.domain.Page;
 import starlight.backend.skill.model.entity.SkillEntity;
 import starlight.backend.skill.model.response.SkillWithCategory;
 import starlight.backend.talent.model.response.*;
-import starlight.backend.user.model.entity.PositionEntity;
-import starlight.backend.user.model.entity.UserEntity;
+import starlight.backend.talent.model.entity.PositionEntity;
+import starlight.backend.talent.model.entity.TalentEntity;
 
 import static org.mapstruct.ReportingPolicy.IGNORE;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = IGNORE)
 public interface MapperTalent {
-    default TalentProfile toTalentProfile(UserEntity user) {
+    default TalentProfile toTalentProfile(TalentEntity talent) {
         return TalentProfile.builder()
-                .fullName(user.getFullName())
-                .id(user.getUserId())
-                .position(user.getPositions().stream()
+                .fullName(talent.getFullName())
+                .id(talent.getTalentId())
+                .position(talent.getPositions().stream()
                         .findAny()
                         .map(PositionEntity::getPosition)
                         .orElse(null))
-                .avatar(user.getAvatar())
+                .avatar(talent.getAvatar())
                 .build();
     }
 
-    default TalentPagePagination toTalentPagePagination(Page<UserEntity> user) {
+    default TalentPagePagination toTalentPagePagination(Page<TalentEntity> talent) {
         return TalentPagePagination.builder()
-                .data(user.getContent().
+                .data(talent.getContent().
                         stream().map(this::toTalentProfile).toList())
-                .total(user.getTotalElements())
+                .total(talent.getTotalElements())
                 .build();
     }
 
-    default TalentFullInfo toTalentFullInfo(UserEntity user) {
+    default TalentFullInfo toTalentFullInfo(TalentEntity talent) {
         return TalentFullInfo.builder()
-                .fullName(user.getFullName())
-                .email(user.getEmail())
-                .birthday(user.getBirthday())
-                .avatar(user.getAvatar())
-                .experience(user.getExperience())
-                .education(user.getEducation())
-                .positions(user.getPositions().stream().map(PositionEntity::getPosition).toList())
+                .fullName(talent.getFullName())
+                .email(talent.getEmail())
+                .birthday(talent.getBirthday())
+                .avatar(talent.getAvatar())
+                .experience(talent.getExperience())
+                .education(talent.getEducation())
+                .positions(talent.getPositions().stream().map(PositionEntity::getPosition).toList())
                 .build();
     }
 
-    default TalentPagePaginationWithFilterSkills toTalentListWithPaginationAndFilter(Page<UserEntity> sortedTalent){
+    default TalentPagePaginationWithFilterSkills toTalentListWithPaginationAndFilter(Page<TalentEntity> sortedTalent){
         return TalentPagePaginationWithFilterSkills.builder()
                 .data(sortedTalent.getContent().stream()
                         .map(this::toTalentWithSkills)
@@ -53,16 +53,16 @@ public interface MapperTalent {
                 .build();
     }
 
-    default TalentWithSkills toTalentWithSkills(UserEntity user) {
+    default TalentWithSkills toTalentWithSkills(TalentEntity talent) {
         return TalentWithSkills.builder()
-                .id(user.getUserId())
-                .fullName(user.getFullName())
-                .avatar(user.getAvatar())
-                .position(user.getPositions().stream()
+                .id(talent.getTalentId())
+                .fullName(talent.getFullName())
+                .avatar(talent.getAvatar())
+                .position(talent.getPositions().stream()
                         .findAny()
                         .map(PositionEntity::getPosition)
                         .orElse(null))
-                .skill(user.getTalentSkills()
+                .skill(talent.getTalentSkills()
                         .stream()
                         .map(this::toSkillWithCategory)
                         .toList())
